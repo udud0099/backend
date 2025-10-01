@@ -31,7 +31,7 @@ export default async function TopicsList() {
             </div>
             <div className="flex-[.2] flex gap-2">
               <Link href={`/editTopic/${item._id}`}>Edit</Link>
-              <RemoveBtn />
+              <RemoveBtn id={item._id}/>
             </div>
           </div>
         </div>
