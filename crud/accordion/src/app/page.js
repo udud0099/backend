@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -5,39 +8,44 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const getTopic = async () => {
-  try {
-    const res = await fetch("http://localhost:3000/api/mydata", {
-      cache: "no-store",
-    });
+export default function Home() {
+  const [accordions, setAccordions] = useState([]);
+  const [openItem, setOpenItem] = useState(null);
 
-    if (!res.ok) throw new Error("Faild to fetch data");
+  useEffect(() => {
+    const getTopic = async () => {
+      try {
+        const res = await fetch("/api/mydata", { cache: "no-store" });
+        if (!res.ok) throw new Error("Failed to fetch data");
+        const data = await res.json();
+        setAccordions(data.accordions || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-    return res.json();
-  } catch (error) {
-    console.log("error is :", error);
-  }
-};
+    getTopic();
+  }, []);
 
-export default async function Home() {
-  const { accordions } = await getTopic();
-  console.log(accordions, "ok");
   return (
-    <>
-      <div>
-        <Accordion
-          type="single"
-          collapsible
-          className="w-full"
-          // defaultValue="item-1"
-        >
-          <AccordionItem value="item-1">
-            <AccordionTrigger>Product Information</AccordionTrigger>
+    <div>
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full"
+        value={openItem ?? undefined}
+        onValueChange={(val) => setOpenItem(val)}
+      >
+        {accordions.map((item, index) => (
+          <AccordionItem value={`item-${index}`} key={index}>
+            <AccordionTrigger>
+              {openItem === `item-${index}` ? item.add : item.name}
+            </AccordionTrigger>
             <AccordionContent className="flex flex-col gap-4 text-balance">
               <p>
-                Our flagship product combines cutting-edge technology with sleek
-                design. Built with premium materials, it offers unparalleled
-                performance and reliability.
+                Our flagship product combines cutting-edge technology with
+                sleek design. Built with premium materials, it offers
+                unparalleled performance and reliability.
               </p>
               <p>
                 Key features include advanced processing capabilities, and an
@@ -46,37 +54,8 @@ export default async function Home() {
               </p>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem value="item-2">
-            <AccordionTrigger>Shipping Details</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-4 text-balance">
-              <p>
-                We offer worldwide shipping through trusted courier partners.
-                Standard delivery takes 3-5 business days, while express
-                shipping ensures delivery within 1-2 business days.
-              </p>
-              <p>
-                All orders are carefully packaged and fully insured. Track your
-                shipment in real-time through our dedicated tracking portal.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="item-3">
-            <AccordionTrigger>Return Policy</AccordionTrigger>
-            <AccordionContent className="flex flex-col gap-4 text-balance">
-              <p>
-                We stand behind our products with a comprehensive 30-day return
-                policy. If you&apos;re not completely satisfied, simply return
-                the item in its original condition.
-              </p>
-              <p>
-                Our hassle-free return process includes free return shipping and
-                full refunds processed within 48 hours of receiving the returned
-                item.
-              </p>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </div>
-    </>
+        ))}
+      </Accordion>
+    </div>
   );
 }
